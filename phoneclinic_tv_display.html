@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhoneClinic TV Display</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100vw;height:100vh;overflow:hidden;background:#0A0A0A;color:#fff;font-family:'DM Sans',sans-serif}
+
+.top-bar{position:fixed;top:0;left:0;right:0;height:80px;background:rgba(10,10,10,0.97);border-bottom:2px solid #D62B2B;display:flex;align-items:center;justify-content:space-between;padding:0 48px;z-index:999}
+.tb-logo{display:flex;align-items:center;gap:14px}
+.tb-logo img{height:50px}
+.tb-name{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px}
+.tb-name .r{color:#D62B2B}
+.tb-right{text-align:right}
+.tb-time{font-family:'Bebas Neue',sans-serif;font-size:40px;line-height:1}
+.tb-date{font-size:13px;color:#9CA3AF}
+
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;height:56px;background:rgba(10,10,10,0.97);border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;padding:0 48px;z-index:999}
+.bb-info{font-size:14px;color:#9CA3AF}
+.bb-info b{color:#fff}
+.bb-dots{display:flex;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);transition:all .3s}
+.dot.on{background:#D62B2B;width:24px;border-radius:4px}
+
+.prog{position:fixed;bottom:56px;left:0;height:3px;background:#D62B2B;z-index:999;width:0}
+
+.slides{position:fixed;top:80px;bottom:56px;left:0;right:0}
+.slide{position:absolute;inset:0;opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center;padding:20px 48px;transition:opacity .5s}
+.slide.on{opacity:1;pointer-events:auto}
+
+/* SLIDE 1 */
+.s1{flex-direction:column;text-align:center;gap:28px;background:#0A0A0A;position:relative;overflow:hidden}
+.s1::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 50%,rgba(214,43,43,0.1) 0%,transparent 70%);pointer-events:none}
+.s1 *{position:relative;z-index:1}
+.badge{display:inline-block;background:rgba(214,43,43,0.15);border:1px solid rgba(214,43,43,0.3);border-radius:100px;padding:8px 28px;font-size:15px;font-weight:600;color:#D62B2B;letter-spacing:2px;text-transform:uppercase}
+.s1-h{font-family:'Bebas Neue',sans-serif;font-size:clamp(80px,11vw,140px);line-height:.9;letter-spacing:2px}
+.s1-h .r{color:#D62B2B}
+.s1-p{font-size:22px;color:#9CA3AF;max-width:680px;line-height:1.5}
+.s1-stats{display:flex;gap:2px}
+.stat{background:#111;border:1px solid rgba(255,255,255,0.08);padding:22px 52px;text-align:center}
+.stat:first-child{border-radius:14px 0 0 14px}
+.stat:last-child{border-radius:0 14px 14px 0}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:56px;color:#D62B2B;line-height:1}
+.stat-l{font-size:13px;color:#9CA3AF;margin-top:4px}
+
+/* SLIDE 2 */
+.s2{flex-direction:column;text-align:center;gap:44px;background:#0A0A0A}
+.s2-lbl{font-size:15px;font-weight:600;color:#D62B2B;letter-spacing:2px;text-transform:uppercase}
+.s2-h{font-family:'Bebas Neue',sans-serif;font-size:clamp(60px,9vw,100px);line-height:.9}
+.s2-h .r{color:#D62B2B}
+.s2-cards{display:flex;gap:24px;justify-content:center}
+.sc{background:#111;border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:36px 52px;display:flex;flex-direction:column;align-items:center;gap:14px;min-width:260px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#D62B2B}
+.sc-ico{font-size:52px}
+.sc-name{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px}
+.sc-handle{font-size:18px;color:#D62B2B;font-weight:600}
+.sc-sub{font-size:13px;color:#9CA3AF}
+
+/* SLIDE 3 */
+.s3{flex-direction:column;gap:36px;background:#111}
+.s3-top{display:flex;align-items:center;justify-content:center;gap:32px}
+.s3-big{font-family:'Bebas Neue',sans-serif;font-size:110px;line-height:1}
+.s3-r{display:flex;flex-direction:column;gap:8px}
+.s3-stars{font-size:38px;color:#F59E0B;letter-spacing:4px}
+.s3-cnt{font-size:17px;color:#9CA3AF}
+.s3-g{font-size:14px;color:#9CA3AF;display:flex;align-items:center;gap:8px}
+.gdot{width:10px;height:10px;border-radius:50%;background:#4285F4;display:inline-block}
+.rv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;width:100%}
+.rv{background:#1A1A1A;border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:28px}
+.rv-stars{font-size:18px;color:#F59E0B;margin-bottom:12px}
+.rv-txt{font-size:16px;color:rgba(255,255,255,0.85);line-height:1.6;font-style:italic;margin-bottom:18px}
+.rv-auth{display:flex;align-items:center;gap:12px}
+.rv-av{width:42px;height:42px;border-radius:50%;background:#D62B2B;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:20px;flex-shrink:0}
+.rv-name{font-size:14px;font-weight:600}
+.rv-badge{font-size:11px;color:#9CA3AF}
+
+/* SLIDE 4 */
+.s4{flex-direction:column;gap:32px;background:#0A0A0A}
+.s4-hdr{text-align:center}
+.s4-lbl{font-size:15px;font-weight:600;color:#D62B2B;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.s4-h{font-family:'Bebas Neue',sans-serif;font-size:clamp(50px,7vw,80px);line-height:1}
+.s4-h .r{color:#D62B2B}
+.s4-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;width:100%}
+.sv{background:#111;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px 20px;text-align:center;position:relative;overflow:hidden}
+.sv::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:#D62B2B}
+.sv-ico{font-size:44px;margin-bottom:14px}
+.sv-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:12px}
+.sv-items{display:flex;flex-direction:column;gap:5px}
+.sv-item{font-size:14px;color:#9CA3AF}
+
+/* SLIDE 5 */
+.s5{flex-direction:column;text-align:center;gap:28px;background:#D62B2B;position:relative;overflow:hidden}
+.s5::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.s5-badge,.s5-h,.s5-p,.s5-pills,.pill{position:relative;z-index:1}
+.s5-badge{display:inline-block;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:100px;padding:8px 28px;font-size:16px;font-weight:600;letter-spacing:2px;text-transform:uppercase}
+.s5-h{font-family:'Bebas Neue',sans-serif;font-size:clamp(70px,11vw,140px);line-height:.9;letter-spacing:2px}
+.s5-p{font-size:24px;color:rgba(255,255,255,0.85);max-width:680px;line-height:1.4}
+.s5-pills{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.pill{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:100px;padding:12px 28px;font-size:18px;font-weight:600}
+
+/* SLIDE 6 */
+.s6{gap:64px;background:#111}
+.s6-l{flex:1;display:flex;flex-direction:column;gap:0}
+.s6-lbl{font-size:15px;font-weight:600;color:#D62B2B;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.s6-h{font-family:'Bebas Neue',sans-serif;font-size:clamp(50px,7vw,90px);line-height:.9;margin-bottom:32px}
+.s6-h .r{color:#D62B2B}
+.s6-info{display:flex;flex-direction:column;gap:18px}
+.s6-row{display:flex;align-items:flex-start;gap:16px}
+.s6-ico{font-size:26px;flex-shrink:0}
+.s6-txt strong{display:block;font-size:15px;font-weight:700;margin-bottom:2px}
+.s6-txt span{font-size:14px;color:#9CA3AF;line-height:1.5}
+.s6-r{flex:1;display:flex;flex-direction:column;gap:14px}
+.hcard{background:#1A1A1A;border:1px solid rgba(255,255,255,0.06);border-radius:20px;overflow:hidden}
+.hcard-h{background:#D62B2B;padding:16px 26px}
+.hcard-h h3{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px}
+.hrow{display:flex;justify-content:space-between;padding:14px 26px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:15px}
+.hrow:last-child{border-bottom:none}
+.hday{color:rgba(255,255,255,0.6)}
+.htime{font-weight:600}
+.walkin{background:#1A1A1A;border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:22px;text-align:center}
+.walkin-h{font-family:'Bebas Neue',sans-serif;font-size:28px;margin-bottom:6px}
+.walkin-p{font-size:14px;color:#9CA3AF}
+
+/* SLIDE 7 — INSTAGRAM */
+.s7{gap:64px;background:#0A0A0A}
+.s7-left{flex:1;display:flex;flex-direction:column;gap:16px}
+.s7-lbl{font-size:15px;font-weight:600;color:#D62B2B;letter-spacing:2px;text-transform:uppercase}
+.s7-h{font-family:'Bebas Neue',sans-serif;font-size:clamp(50px,7vw,88px);line-height:.9}
+.s7-h .r{color:#D62B2B}
+.s7-p{font-size:18px;color:#9CA3AF;line-height:1.6;max-width:420px}
+.s7-handle{font-family:'Bebas Neue',sans-serif;font-size:36px;color:#D62B2B;letter-spacing:1px;background:rgba(214,43,43,0.08);border:1px solid rgba(214,43,43,0.2);border-radius:12px;padding:14px 24px;display:inline-block}
+.s7-action{font-size:15px;color:#9CA3AF;line-height:1.5;background:#111;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px 20px}
+.s7-action .r{color:#D62B2B;font-weight:700}
+.s7-right{flex:1;display:flex;flex-direction:column;gap:14px}
+.s7-feed-label{font-size:14px;font-weight:600;color:#9CA3AF;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.s7-feed{display:flex;flex-direction:column;gap:10px}
+.s7-post{display:flex;align-items:center;gap:16px;background:#111;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px 20px}
+.s7-post-icon{font-size:28px;flex-shrink:0}
+.s7-post-txt strong{display:block;font-size:15px;font-weight:700;margin-bottom:2px}
+.s7-post-txt span{font-size:13px;color:#9CA3AF}
+
+/* SLIDE 8 — REVIEW CTA */
+.s8{background:linear-gradient(135deg,#0A0A0A 0%,#1A0505 100%);gap:40px}
+.s8-left{flex:1;display:flex;flex-direction:column;gap:12px;justify-content:center}
+.s8-right{flex:1;display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center}
+.s8-badge{display:inline-block;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);border-radius:100px;padding:6px 18px;font-size:12px;font-weight:600;color:#F59E0B;letter-spacing:1px;text-transform:uppercase}
+.s8-h{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,60px);line-height:.9;letter-spacing:1px}
+.s8-h .r{color:#D62B2B}
+.s8-p{font-size:14px;color:#9CA3AF;line-height:1.5;max-width:460px}
+.s8-steps{display:flex;flex-direction:column;gap:8px}
+.s8-step{display:flex;align-items:center;gap:12px;background:#111;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:11px 16px}
+.s8-num{width:32px;height:32px;border-radius:50%;background:#D62B2B;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;flex-shrink:0}
+.s8-stxt{font-size:14px;color:rgba(255,255,255,0.85);line-height:1.3}
+.s8-stxt strong{color:#fff}
+.s8-reward{background:rgba(214,43,43,0.12);border:1px solid rgba(214,43,43,0.3);border-radius:12px;padding:10px 16px;font-size:14px;color:rgba(255,255,255,0.9);line-height:1.4}
+.s8-reward strong{font-weight:700}
+.s8-qr-block{display:flex;flex-direction:column;align-items:center;gap:8px;background:#111;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px 28px}
+.s8-qr-img{width:160px;height:160px;border-radius:12px;border:3px solid rgba(255,255,255,0.1)}
+.s8-qr-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;text-align:center;margin-top:4px}
+.s8-qr-sub{font-size:14px;color:#9CA3AF;text-align:center}
+.s8-reward-big{background:#D62B2B;border-radius:14px;padding:14px 24px;text-align:center}
+.s8-reward-big-num{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1}
+.s8-reward-big-num span{font-size:28px}
+.s8-reward-big-txt{font-size:14px;font-weight:600;color:rgba(255,255,255,0.9);margin-top:2px}
+
+/* SLIDE 9 — FACEBOOK */
+.s9{gap:64px;background:#0A0A0A}
+.s9-left{flex:1;display:flex;flex-direction:column;gap:16px}
+.s9-lbl{font-size:15px;font-weight:600;color:#1877F2;letter-spacing:2px;text-transform:uppercase}
+.s9-h{font-family:'Bebas Neue',sans-serif;font-size:clamp(50px,7vw,88px);line-height:.9}
+.s9-h .r{color:#D62B2B}
+.s9-p{font-size:18px;color:#9CA3AF;line-height:1.6;max-width:420px}
+.s9-handle{font-family:'Bebas Neue',sans-serif;font-size:30px;color:#1877F2;letter-spacing:1px;background:rgba(24,119,242,0.08);border:1px solid rgba(24,119,242,0.2);border-radius:12px;padding:14px 24px;display:inline-block}
+.s9-action{font-size:15px;color:#9CA3AF;line-height:1.5;background:#111;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px 20px}
+.s9-action .r{color:#D62B2B;font-weight:700}
+.s9-right{flex:1;display:flex;flex-direction:column;gap:14px}
+.s9-engage-label{font-size:14px;font-weight:600;color:#9CA3AF;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.s9-engages{display:flex;flex-direction:column;gap:10px}
+.s9-eng{display:flex;align-items:center;gap:16px;background:#111;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px 20px}
+.s9-eng-icon{font-size:28px;flex-shrink:0}
+.s9-eng-txt strong{display:block;font-size:15px;font-weight:700;margin-bottom:2px}
+.s9-eng-txt span{font-size:13px;color:#9CA3AF}
+
+
+/* QR CODES */
+.qr{width:110px;height:110px;border-radius:10px;border:3px solid rgba(255,255,255,0.1);background:#111}
+.qr-lg{width:130px;height:130px;border-radius:12px;border:3px solid rgba(255,255,255,0.1);background:#111;flex-shrink:0}
+.qr-lbl{font-size:12px;color:#9CA3AF;text-align:center;margin-top:6px}
+.s7-handle-row{display:flex;align-items:center;gap:20px}
+.s7-qr-wrap{display:flex;flex-direction:column;align-items:center}
+.s9-handle-row{display:flex;align-items:center;gap:20px}
+.s8-qr-row{display:flex;align-items:center;gap:20px;background:#111;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px 28px}
+.s8-qr-txt{font-size:18px;color:rgba(255,255,255,0.85);line-height:1.5;text-align:left}
+
+
+/* S5 FIX */
+.s5-inner{display:flex;flex-direction:column;align-items:center;gap:28px;position:relative;z-index:1;text-align:center}
+
+/* DISCOUNT BOXES */
+.s7-discount-box,.s9-discount-box{
+  background:rgba(0,0,0,0.4);
+  border:2px solid rgba(255,255,255,0.15);
+  border-radius:20px;
+  padding:24px 28px;
+  display:flex;flex-direction:column;gap:16px;
+}
+.s7-disc-title{
+  font-family:'Syne',sans-serif;
+  font-size:20px;font-weight:800;
+  color:#F59E0B;
+  text-align:center;
+  padding-bottom:12px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.s7-disc-steps{display:flex;flex-direction:column;gap:10px}
+.s7-disc-step{
+  display:flex;align-items:center;gap:14px;
+  font-size:16px;color:rgba(255,255,255,0.9);
+}
+.s7-disc-step strong{color:#fff}
+.s7-disc-num{
+  width:32px;height:32px;border-radius:50%;
+  background:#D62B2B;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:18px;
+  flex-shrink:0;
+}
+.s7-disc-cta{
+  background:rgba(214,43,43,0.15);
+  border:1px solid rgba(214,43,43,0.3);
+  border-radius:12px;
+  padding:14px 20px;
+  font-size:15px;
+  color:rgba(255,255,255,0.9);
+  text-align:center;
+  line-height:1.5;
+}
+
+
+/* ===== COMBINED SOCIAL + DISCOUNT SLIDE ===== */
+.sc-slide{background:#0A0A0A;flex-direction:column;gap:20px;padding:24px 48px}
+.scs-inner{display:flex;flex-direction:column;gap:20px;width:100%;max-width:1300px}
+.scs-top{text-align:center}
+.scs-badge{display:inline-block;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.35);border-radius:100px;padding:8px 28px;font-size:15px;font-weight:700;color:#F59E0B;letter-spacing:1px;margin-bottom:10px}
+.scs-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,6vw,80px);line-height:.95;letter-spacing:1px}
+.scs-title .r{color:#D62B2B}
+.scs-body{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:20px;align-items:stretch}
+
+/* Platform cards */
+.scs-platform{background:#111;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;align-items:center;justify-content:space-between}
+.scs-platform-header{display:flex;align-items:center;gap:14px;width:100%}
+.scs-platform-header.ig{border-bottom:2px solid #E1306C;padding-bottom:14px}
+.scs-platform-header.fb{border-bottom:2px solid #1877F2;padding-bottom:14px}
+.scs-p-icon{font-size:36px;flex-shrink:0}
+.scs-p-name{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;line-height:1}
+.scs-p-handle{font-size:14px;color:#D62B2B;font-weight:600;margin-top:2px}
+.scs-qr-center{display:flex;flex-direction:column;align-items:center;gap:8px}
+.scs-qr{width:150px;height:150px;border-radius:12px;border:3px solid rgba(255,255,255,0.1)}
+.scs-qr-lbl{font-size:13px;color:#9CA3AF;font-weight:500}
+
+/* Discount middle */
+.scs-discount{background:linear-gradient(135deg,#1A0505,#0A0A0A);border:2px solid rgba(214,43,43,0.3);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px}
+.scs-disc-header{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#F59E0B;text-align:center;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.scs-steps{display:flex;flex-direction:column;gap:10px}
+.scs-step{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);border-radius:12px;padding:12px 16px}
+.scs-step-num{width:34px;height:34px;border-radius:50%;background:#D62B2B;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:20px;flex-shrink:0}
+.scs-step-title{font-size:15px;font-weight:700;line-height:1;margin-bottom:3px}
+.scs-step-sub{font-size:12px;color:#9CA3AF}
+.scs-reward{background:#D62B2B;border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;justify-content:center;margin-top:4px}
+.scs-reward-num{font-family:'Bebas Neue',sans-serif;font-size:64px;line-height:1;color:#fff}
+.scs-reward-num span{font-size:36px}
+.scs-reward-txt{font-size:18px;font-weight:700;color:#fff;line-height:1.4}
+.scs-reward-txt span{font-size:13px;font-weight:400;color:rgba(255,255,255,0.8);display:block;margin-top:4px}
+
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="tb-logo">
+    <img src="https://storage.googleapis.com/funnel-ai-production/chat/gsEwohOYh5SFv4ROcjgy/PhoneClinic-Logo--1-.png" alt="" onerror="this.style.display='none'">
+    <div class="tb-name"><span class="r">PHONE</span>CLINIC <span style="color:#9CA3AF;font-size:16px;font-family:'DM Sans'">· Tuscaloosa, AL</span></div>
+  </div>
+  <div class="tb-right">
+    <div class="tb-time" id="clk"></div>
+    <div class="tb-date" id="dat"></div>
+  </div>
+</div>
+
+<div class="slides">
+
+  <div class="slide s1 on">
+    <div class="badge">📍 Tuscaloosa, Alabama</div>
+    <div class="s1-h">WELCOME TO<br><span class="r">PHONECLINIC</span></div>
+    <div class="s1-p">Your device is in expert hands. Most repairs done in <strong style="color:#fff">30 minutes or less.</strong></div>
+    <div class="s1-stats">
+      <div class="stat"><div class="stat-n">4.8★</div><div class="stat-l">Google Rating</div></div>
+      <div class="stat"><div class="stat-n">1,000+</div><div class="stat-l">Reviews</div></div>
+      <div class="stat"><div class="stat-n">30<span style="font-size:30px">min</span></div><div class="stat-l">Avg Repair</div></div>
+      <div class="stat"><div class="stat-n">12+</div><div class="stat-l">Yrs Experience</div></div>
+    </div>
+  </div>
+
+
+  <!-- COMBINED SOCIAL + DISCOUNT SLIDE -->
+  <div class="slide sc-slide">
+    <div class="scs-inner">
+      <div class="scs-top">
+        <div class="scs-badge">🎁 Follow · Comment · Tag = 10% OFF Your Repair Today!</div>
+        <div class="scs-title">FOLLOW US &amp; <span class="r">SAVE</span></div>
+      </div>
+      <div class="scs-body">
+        <!-- INSTAGRAM -->
+        <div class="scs-platform">
+          <div class="scs-platform-header ig">
+            <div class="scs-p-icon">📷</div>
+            <div>
+              <div class="scs-p-name">Instagram</div>
+              <div class="scs-p-handle">@phoneclinic.tuscaloosa</div>
+            </div>
+          </div>
+          <div class="scs-qr-center">
+            <img class="scs-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.instagram.com/phoneclinic.tuscaloosa&bgcolor=111111&color=ffffff&format=png" alt="Instagram QR">
+            <div class="scs-qr-lbl">Scan to follow</div>
+          </div>
+        </div>
+
+        <!-- DISCOUNT STEPS -->
+        <div class="scs-discount">
+          <div class="scs-disc-header">Do all 3 steps → Show us → Get 10% OFF</div>
+          <div class="scs-steps">
+            <div class="scs-step">
+              <div class="scs-step-num">1</div>
+              <div class="scs-step-body">
+                <div class="scs-step-title">Follow Us</div>
+                <div class="scs-step-sub">Follow on Instagram or like on Facebook</div>
+              </div>
+            </div>
+            <div class="scs-step">
+              <div class="scs-step-num">2</div>
+              <div class="scs-step-body">
+                <div class="scs-step-title">Comment</div>
+                <div class="scs-step-sub">Comment on our most recent post</div>
+              </div>
+            </div>
+            <div class="scs-step">
+              <div class="scs-step-num">3</div>
+              <div class="scs-step-body">
+                <div class="scs-step-title">Tag a Friend</div>
+                <div class="scs-step-sub">Tag someone who needs a repair</div>
+              </div>
+            </div>
+          </div>
+          <div class="scs-reward">
+            <div class="scs-reward-num">10<span>%</span></div>
+            <div class="scs-reward-txt">OFF your repair<br><span>Show us your comment at the counter</span></div>
+          </div>
+        </div>
+
+        <!-- FACEBOOK -->
+        <div class="scs-platform">
+          <div class="scs-platform-header fb">
+            <div class="scs-p-icon">👍</div>
+            <div>
+              <div class="scs-p-name">Facebook</div>
+              <div class="scs-p-handle">PhoneClinic Tuscaloosa</div>
+            </div>
+          </div>
+          <div class="scs-qr-center">
+            <img class="scs-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.facebook.com/phoneclinic17&bgcolor=111111&color=ffffff&format=png" alt="Facebook QR">
+            <div class="scs-qr-lbl">Scan to follow</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="slide s3">
+    <div class="s3-top">
+      <div class="s3-big">4.8</div>
+      <div class="s3-r">
+        <div class="s3-stars">★★★★★</div>
+        <div class="s3-cnt">Based on 1,000+ Google Reviews</div>
+        <div class="s3-g"><span class="gdot"></span> Verified Google Reviews</div>
+      </div>
+    </div>
+    <div class="rv-grid">
+      <div class="rv"><div class="rv-stars">★★★★★</div><div class="rv-txt">"Fixed my iPhone screen in 30 minutes. Incredible service and fair pricing. Will definitely be back!"</div><div class="rv-auth"><div class="rv-av">J</div><div><div class="rv-name">John S.</div><div class="rv-badge">Verified Google Review</div></div></div></div>
+      <div class="rv"><div class="rv-stars">★★★★★</div><div class="rv-txt">"Saved my water-damaged Samsung when I thought it was gone. Best repair shop in Tuscaloosa!"</div><div class="rv-auth"><div class="rv-av">S</div><div><div class="rv-name">Sarah B.</div><div class="rv-badge">Verified Google Review</div></div></div></div>
+      <div class="rv"><div class="rv-stars">★★★★★</div><div class="rv-txt">"Beat the price I was quoted elsewhere by $15! Amazing team and super fast turnaround. Highly recommend!"</div><div class="rv-auth"><div class="rv-av">M</div><div><div class="rv-name">Michael J.</div><div class="rv-badge">Verified Google Review</div></div></div></div>
+    </div>
+  </div>
+
+  <div class="slide s4">
+    <div class="s4-hdr"><div class="s4-lbl">What We Repair</div><div class="s4-h">WE FIX <span class="r">EVERYTHING</span></div></div>
+    <div class="s4-grid">
+      <div class="sv"><div class="sv-ico">📱</div><div class="sv-title">iPhone Repair</div><div class="sv-items"><div class="sv-item">Screen Replacement</div><div class="sv-item">Battery Replacement</div><div class="sv-item">Charging Port</div><div class="sv-item">Camera Repair</div><div class="sv-item">Water Damage</div></div></div>
+      <div class="sv"><div class="sv-ico">📲</div><div class="sv-title">Samsung Repair</div><div class="sv-items"><div class="sv-item">AMOLED Screen</div><div class="sv-item">Battery Replacement</div><div class="sv-item">Charging Port</div><div class="sv-item">Water Damage</div><div class="sv-item">All Galaxy Models</div></div></div>
+      <div class="sv"><div class="sv-ico">📟</div><div class="sv-title">Tablet Repair</div><div class="sv-items"><div class="sv-item">iPad Screen</div><div class="sv-item">Android Tablets</div><div class="sv-item">Battery Replacement</div><div class="sv-item">Charging Port</div><div class="sv-item">All Brands</div></div></div>
+      <div class="sv"><div class="sv-ico">🎮</div><div class="sv-title">Console Repair</div><div class="sv-items"><div class="sv-item">PlayStation 4 & 5</div><div class="sv-item">Xbox Series X/S</div><div class="sv-item">Nintendo Switch</div><div class="sv-item">HDMI Port</div><div class="sv-item">Disc Drive</div></div></div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8 — LEAVE A REVIEW -->
+  <div class="slide s8">
+    <div class="s8-left">
+      <div class="s8-badge">⭐ Did We Wow You Today?</div>
+      <div class="s8-h">LEAVE US A<br><span class="r">GOOGLE</span><br>REVIEW</div>
+      <div class="s8-p">1,000+ customers have already shared their story. Add yours in 60 seconds — it means the world to our team.</div>
+      <div class="s8-steps">
+        <div class="s8-step"><div class="s8-num">1</div><div class="s8-stxt">Scan the QR code with your phone camera</div></div>
+        <div class="s8-step"><div class="s8-num">2</div><div class="s8-stxt">Tap <strong>"Write a Review"</strong> on Google Maps</div></div>
+        <div class="s8-step"><div class="s8-num">3</div><div class="s8-stxt">Share your experience in a few words</div></div>
+      </div>
+      <div class="s8-reward">🎁 Show us your new review at the counter → get <strong>10% OFF</strong> your next repair!</div>
+    </div>
+    <div class="s8-right">
+      <div class="s8-qr-block">
+        <img class="s8-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://share.google/8iJadXwgthguT4Pk3&bgcolor=111111&color=ffffff&format=png" alt="Google Review QR">
+        <div class="s8-qr-title">📱 Scan to Review Us on Google</div>
+        <div class="s8-qr-sub">Opens Google Maps directly on your phone</div>
+      </div>
+      <div class="s8-reward-big">
+        <div class="s8-reward-big-num">10<span>%</span> OFF</div>
+        <div class="s8-reward-big-txt">Show us your review at the counter</div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<div class="bottom-bar">
+  <div class="bb-info">📞 <b>(205) 535-2575</b> &nbsp;·&nbsp; 📍 <b>1110 15th St Suite H, Tuscaloosa AL</b> &nbsp;·&nbsp; 🌐 <b>phoneclinics.net</b></div>
+  <div class="bb-dots" id="dots"></div>
+</div>
+<div class="prog" id="prog"></div>
+
+<script>
+const DURATION = 8000;
+const slides = document.querySelectorAll('.slide');
+const dotsEl = document.getElementById('dots');
+const prog = document.getElementById('prog');
+let cur = 0, interval = null;
+
+slides.forEach((_,i) => {
+  const d = document.createElement('div');
+  d.className = 'dot'+(i===0?' on':'');
+  dotsEl.appendChild(d);
+});
+
+function show(n) {
+  slides[cur].classList.remove('on');
+  document.querySelectorAll('.dot')[cur].classList.remove('on');
+  cur = ((n % slides.length) + slides.length) % slides.length;
+  slides[cur].classList.add('on');
+  document.querySelectorAll('.dot')[cur].classList.add('on');
+  prog.style.transition = 'none';
+  prog.style.width = '0%';
+  setTimeout(() => {
+    prog.style.transition = `width ${DURATION}ms linear`;
+    prog.style.width = '100%';
+  }, 30);
+}
+
+function tick() {
+  const n = new Date();
+  const h = n.getHours()%12||12;
+  const m = String(n.getMinutes()).padStart(2,'0');
+  const ap = n.getHours()>=12?'PM':'AM';
+  document.getElementById('clk').textContent = `${h}:${m} ${ap}`;
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const mons=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('dat').textContent = `${days[n.getDay()]}, ${mons[n.getMonth()]} ${n.getDate()}`;
+}
+
+tick();
+setInterval(tick, 1000);
+interval = setInterval(() => show(cur+1), DURATION);
+
+// Start progress bar
+prog.style.transition = `width ${DURATION}ms linear`;
+prog.style.width = '100%';
+
+document.addEventListener('keydown', e => {
+  if(e.key==='ArrowRight'||e.key===' '){clearInterval(interval);show(cur+1);interval=setInterval(()=>show(cur+1),DURATION)}
+  if(e.key==='ArrowLeft'){clearInterval(interval);show(cur-1);interval=setInterval(()=>show(cur+1),DURATION)}
+});
+document.addEventListener('click', () => {clearInterval(interval);show(cur+1);interval=setInterval(()=>show(cur+1),DURATION)});
+</script>
+</body>
+</html>
